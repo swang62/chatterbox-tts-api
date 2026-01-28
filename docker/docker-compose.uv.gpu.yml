@@ -1,12 +1,10 @@
-version: '3.8'
-
 services:
   # Main API Service (always included)
   chatterbox-tts:
     build:
       context: ..
       dockerfile: docker/Dockerfile.uv.gpu
-    container_name: chatterbox-tts-api-uv-gpu
+    container_name: chatterbox-tts
     ports:
       - '${PORT:-4123}:${PORT:-4123}'
     environment:
@@ -15,13 +13,13 @@ services:
       - HOST=${HOST:-0.0.0.0}
 
       # TTS Model Settings
-      - EXAGGERATION=${EXAGGERATION:-0.5}
-      - CFG_WEIGHT=${CFG_WEIGHT:-0.5}
-      - TEMPERATURE=${TEMPERATURE:-0.8}
+      - EXAGGERATION=0.8
+      - CFG_WEIGHT=0.6
+      - TEMPERATURE=0.3
 
       # Text Processing
-      - MAX_CHUNK_LENGTH=${MAX_CHUNK_LENGTH:-280}
-      - MAX_TOTAL_LENGTH=${MAX_TOTAL_LENGTH:-3000}
+      - MAX_CHUNK_LENGTH=${MAX_CHUNK_LENGTH:-480}
+      - MAX_TOTAL_LENGTH=${MAX_TOTAL_LENGTH:-4000}
 
       # Long Text TTS Settings
       - LONG_TEXT_DATA_DIR=${LONG_TEXT_DATA_DIR:-/data/long_text_jobs}
@@ -40,12 +38,15 @@ services:
       # NVIDIA/CUDA settings
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+
+      - HF_HOME=/cache/huggingface
+      - TORCH_HOME=/cache/torch
     volumes:
+      - C:/Users/steve/.cache/huggingface:/cache/huggingface
+      - C:/Users/steve/.cache/torch:/cache/torch
+
       # Mount voice sample file (optional)
       - ${VOICE_SAMPLE_HOST_PATH:-../voice-sample.mp3}:/app/voice-sample.mp3:ro
-
-      # Mount model cache for persistence
-      - chatterbox-models:${MODEL_CACHE_DIR:-/cache}
 
       # Mount voice library for persistence
       - chatterbox-voices:${VOICE_LIBRARY_DIR:-/voices}
@@ -53,16 +54,12 @@ services:
       # Mount long text data for persistence
       - chatterbox-longtext-data:${LONG_TEXT_DATA_DIR:-/data/long_text_jobs}
 
-      # Optional: Mount custom voice samples directory (legacy)
-      - ${VOICE_SAMPLES_DIR:-../voice-samples}:/app/voice-samples:ro
-
     # GPU support (enabled by default for this compose file)
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
-              count: 1
               capabilities: [gpu]
 
     restart: unless-stopped
@@ -80,7 +77,7 @@ services:
     build:
       context: ../frontend
       dockerfile: Dockerfile
-    container_name: chatterbox-tts-frontend
+    container_name: chatterbox-frontend
     ports:
       - '${FRONTEND_PORT:-4321}:80' # Frontend serves on port 80 internally
     depends_on:
