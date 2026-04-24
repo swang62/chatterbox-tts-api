@@ -18,8 +18,8 @@ services:
       - TEMPERATURE=0.3
 
       # Text Processing
-      - MAX_CHUNK_LENGTH=${MAX_CHUNK_LENGTH:-480}
-      - MAX_TOTAL_LENGTH=${MAX_TOTAL_LENGTH:-4000}
+      - MAX_CHUNK_LENGTH=${MAX_CHUNK_LENGTH:-280}
+      - MAX_TOTAL_LENGTH=${MAX_TOTAL_LENGTH:-3000}
 
       # Long Text TTS Settings
       - LONG_TEXT_DATA_DIR=${LONG_TEXT_DATA_DIR:-/data/long_text_jobs}
